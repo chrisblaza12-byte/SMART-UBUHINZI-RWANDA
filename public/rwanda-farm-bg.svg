@@ -1,0 +1,26 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="800" y1="0" x2="800" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCFCE7"/>
+      <stop offset="1" stop-color="#86EFAC"/>
+    </linearGradient>
+    <linearGradient id="field1" x1="0" y1="500" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E7D32"/>
+      <stop offset="1" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="field2" x1="0" y1="560" x2="1600" y2="880" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4D9F34"/>
+      <stop offset="1" stop-color="#166534"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <ellipse cx="1350" cy="140" rx="78" ry="78" fill="#FACC15"/>
+  <path d="M0 440C188 360 414 350 628 430C840 510 1042 502 1268 430C1382 393 1496 374 1600 384V900H0V440Z" fill="url(#field1)"/>
+  <path d="M0 520C190 460 340 454 560 520C812 594 1014 588 1268 520C1382 490 1496 476 1600 486V900H0V520Z" fill="url(#field2)"/>
+  <path d="M0 620C228 560 434 558 640 624C878 700 1084 694 1328 628C1414 606 1502 594 1600 598" stroke="#A3E635" stroke-width="16"/>
+  <path d="M0 700C230 642 442 640 656 710C872 780 1098 776 1324 710C1418 683 1510 670 1600 674" stroke="#BBF7D0" stroke-width="10" opacity="0.8"/>
+  <path d="M760 430V290" stroke="#166534" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="720" cy="334" rx="34" ry="56" transform="rotate(-22 720 334)" fill="#4D9F34"/>
+  <ellipse cx="800" cy="334" rx="34" ry="56" transform="rotate(22 800 334)" fill="#2E7D32"/>
+  <text x="70" y="130" fill="#14532D" font-size="68" font-family="Poppins, Arial, sans-serif" font-weight="700">Smart Ubuhinzi Rwanda</text>
+</svg>
