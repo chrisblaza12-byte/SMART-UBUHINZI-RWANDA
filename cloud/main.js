@@ -1,7 +1,7 @@
 // Authentication, farmer profiles and data ownership safeguards.
 // Sensitive roles are assigned only on the server.
 
-const ADMIN_EMAILS = ["admin1@smartubuhinzi.rw", "admin2@smartubuhinzi.rw"];
+const ADMIN_EMAILS = ["ndayisabapatrick75@gmail.com", "mucyoolivier4@gmail.com"];
 const ADMIN_ROLE = "PlatformAdmin";
 const VALID_TOPICS = ["Crop production", "Livestock", "Market prices", "Weather planning", "AI crop diagnosis"];
 
