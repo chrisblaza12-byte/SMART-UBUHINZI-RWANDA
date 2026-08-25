@@ -1,0 +1,7 @@
+node_modules
+export-package
+vanilla-app
+html
+css
+public/*.zip
+*.zip
