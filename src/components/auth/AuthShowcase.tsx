@@ -108,7 +108,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="relative flex h-[min(500px,calc(100dvh-24px))] w-[min(500px,calc(100vw-24px))] max-w-[500px] items-center justify-center rounded-full border border-[#4da5f5]/40 bg-[#0e2233] shadow-[0_0_55px_rgba(34,153,255,0.22)] sm:h-[min(500px,calc(100dvh-40px))] sm:w-[min(500px,calc(100vw-40px))]">
+        <div className={`relative flex w-[min(500px,calc(100vw-24px))] max-w-[500px] items-center justify-center border border-[#4da5f5]/40 bg-[#0e2233] shadow-[0_0_55px_rgba(34,153,255,0.22)] ${isSignIn ? "aspect-square rounded-full" : "max-h-[calc(100dvh-24px)] min-h-[500px] overflow-hidden rounded-[2rem] sm:min-h-[560px] sm:rounded-[2.5rem]"} sm:h-[min(500px,calc(100dvh-40px))] sm:w-[min(500px,calc(100vw-40px))]`}>
           <motion.div
             className="absolute inset-[16px] rounded-full border border-[#7bc8ff]/20"
             animate={{ rotate: 360 }}
