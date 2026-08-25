@@ -1,7 +1,7 @@
 import Parse from "../../parse";
 import { getAdminName } from "../../lib/authAccess";
 import { Eye, EyeOff, Leaf, Loader2, LockKeyhole, Mail, UserRound, X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LEARNING_TOPICS } from "../../content/authContent";
 
@@ -29,6 +29,8 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [learningTopic, setLearningTopic] = useState<(typeof LEARNING_TOPICS)[number]>(LEARNING_TOPICS[0]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,6 +38,16 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
   const [error, setError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
   const isSignIn = mode === "signin";
+
+  useEffect(() => {
+    if (!profilePhoto) {
+      setPhotoPreview("");
+      return;
+    }
+    const previewUrl = URL.createObjectURL(profilePhoto);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [profilePhoto]);
 
   const switchMode = (next: AuthMode) => { setMode(next); setError(""); setResetMessage(""); setPassword(""); setConfirmPassword(""); };
   const handleForgotPassword = async () => {
@@ -74,6 +86,12 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
       }
       const signedInUser = Parse.User.current();
       if (signedInUser) {
+        if (profilePhoto) {
+          const avatar = new Parse.File(profilePhoto.name, profilePhoto);
+          await avatar.save();
+          signedInUser.set("avatar", avatar);
+          await signedInUser.save();
+        }
         const profileQuery = new Parse.Query("FarmerProfile");
         profileQuery.equalTo("user", signedInUser);
         const profile = await profileQuery.first();
@@ -138,6 +156,11 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
             <h1 className="mb-3 text-center text-3xl font-bold tracking-wide text-[#dcfce7] sm:mb-4 sm:text-4xl">
               {isSignIn ? "Login" : "Register"}
             </h1>
+
+            <label className="mx-auto mb-3 flex h-20 w-20 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-full border border-[#86efac]/80 bg-[#0b3022] text-center text-[11px] font-semibold text-[#b9d7cb] transition hover:border-[#dcfce7] hover:text-white sm:mb-4 sm:h-24 sm:w-24">
+              {photoPreview ? <img src={photoPreview} alt="Selected profile preview" className="h-full w-full object-cover" /> : <><UserRound className="mb-1 h-5 w-5 text-[#86efac]" /><span>Add Photo</span></>}
+              <input type="file" accept="image/*" className="sr-only" onChange={(event: ChangeEvent<HTMLInputElement>) => setProfilePhoto(event.target.files?.[0] || null)} />
+            </label>
 
             <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
               <AnimatePresence initial={false}>
