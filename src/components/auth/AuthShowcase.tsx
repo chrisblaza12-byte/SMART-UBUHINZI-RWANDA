@@ -92,7 +92,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-[#0b1d29]/95 p-3 backdrop-blur-sm sm:p-5">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-[#031b13]/95 p-2 backdrop-blur-sm sm:p-5">
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -103,18 +103,18 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
           type="button"
           onClick={onClose}
           aria-label="Close authentication"
-          className="absolute right-3 top-3 z-30 grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-[#2c4f78] bg-[#112b3f] text-[#8ad9ff] transition hover:bg-[#18324d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ec8ff]"
+          className="absolute right-2 top-2 z-30 grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-[#2b7857] bg-[#0d3023] text-[#86efac] transition hover:bg-[#155c42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ade80] sm:right-3 sm:top-3"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className={`relative flex w-[min(500px,calc(100vw-24px))] max-w-[500px] items-center justify-center border border-[#4da5f5]/40 bg-[#0e2233] shadow-[0_0_55px_rgba(34,153,255,0.22)] ${isSignIn ? "aspect-square rounded-full" : "max-h-[calc(100dvh-24px)] min-h-[500px] overflow-hidden rounded-[2rem] sm:min-h-[560px] sm:rounded-[2.5rem]"} sm:h-[min(500px,calc(100dvh-40px))] sm:w-[min(500px,calc(100vw-40px))]`}>
+        <div className={`relative flex w-[min(500px,calc(100vw-16px))] max-w-[500px] items-center justify-center border border-[#45b879]/45 bg-[#09271d] shadow-[0_0_55px_rgba(34,197,94,0.2)] ${isSignIn ? "aspect-square rounded-full" : "h-[min(560px,calc(100dvh-16px))] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem]"} sm:w-[min(500px,calc(100vw-40px))]`}>
           <motion.div
-            className="absolute inset-[16px] rounded-full border border-[#7bc8ff]/20"
+            className="absolute inset-[16px] rounded-full border border-[#86efac]/20"
             animate={{ rotate: 360 }}
             transition={{ duration: 18, ease: "linear", repeat: Infinity }}
             style={{
-              background: "radial-gradient(circle at center, rgba(21, 51, 75, 0.92) 0%, rgba(9, 24, 35, 0.96) 62%, rgba(6, 14, 23, 1) 100%)",
+              background: "radial-gradient(circle at center, rgba(14, 65, 43, 0.92) 0%, rgba(5, 35, 24, 0.96) 62%, rgba(2, 19, 13, 1) 100%)",
             }}
           />
 
@@ -124,18 +124,18 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
             transition={{ duration: 12, ease: "linear", repeat: Infinity }}
             style={{
               backgroundImage:
-                "repeating-conic-gradient(from 0deg, rgba(122, 214, 255, 0.9) 0deg 4deg, rgba(122, 214, 255, 0.08) 4deg 10deg)",
+                "repeating-conic-gradient(from 0deg, rgba(134, 239, 172, 0.9) 0deg 4deg, rgba(134, 239, 172, 0.08) 4deg 10deg)",
               WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 18px), #000 0)",
               mask: "radial-gradient(farthest-side, transparent calc(100% - 18px), #000 0)",
             }}
           />
 
-          <div className="absolute left-11 top-1/2 h-10 w-3 -translate-y-1/2 rounded-full bg-[#7ad0ff] shadow-[0_0_12px_rgba(122,208,255,0.9)]" />
-          <div className="absolute right-11 top-1/2 h-10 w-3 -translate-y-1/2 rounded-full bg-[#7ad0ff]/60 shadow-[0_0_10px_rgba(122,208,255,0.7)]" />
-          <div className="absolute inset-[42px] rounded-full border border-[#4aa9ff]/35" />
+          <div className="absolute left-6 top-1/2 h-10 w-3 -translate-y-1/2 rounded-full bg-[#86efac] shadow-[0_0_12px_rgba(134,239,172,0.9)] sm:left-11" />
+          <div className="absolute right-6 top-1/2 h-10 w-3 -translate-y-1/2 rounded-full bg-[#86efac]/60 shadow-[0_0_10px_rgba(134,239,172,0.7)] sm:right-11" />
+          <div className="absolute inset-[42px] rounded-full border border-[#4ade80]/35" />
 
           <div className="relative z-10 max-h-[calc(100%_-_56px)] w-[82%] max-w-[300px] overflow-y-auto rounded-[34px] px-2 py-3 sm:px-3 sm:py-4">
-            <h1 className="mb-3 text-center text-3xl font-bold tracking-wide text-[#bfefff] sm:mb-4 sm:text-4xl">
+            <h1 className="mb-3 text-center text-3xl font-bold tracking-wide text-[#dcfce7] sm:mb-4 sm:text-4xl">
               {isSignIn ? "Login" : "Register"}
             </h1>
 
@@ -183,7 +183,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="cursor-pointer text-[11px] font-semibold text-[#6ad0ff] transition hover:text-[#bfefff] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-0 cursor-pointer text-[11px] font-semibold text-[#86efac] transition hover:text-[#dcfce7] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Forgot password?
                 </button>
@@ -212,10 +212,10 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
                       value={learningTopic}
                       onChange={(event) => setLearningTopic(event.target.value as (typeof LEARNING_TOPICS)[number])}
                       aria-label="Learning interest"
-                      className="min-h-11 w-full rounded-xl border border-[#1b9fff]/60 bg-[#0d2a3d] px-3 py-2.5 text-sm text-[#d7f0ff] outline-none transition focus:border-[#4ec8ff] focus:ring-2 focus:ring-[#4ec8ff]/25"
+                      className="min-h-11 w-full rounded-xl border border-[#2b9b63]/70 bg-[#082d20] px-3 py-2.5 text-sm text-[#dcfce7] outline-none transition focus:border-[#86efac] focus:ring-2 focus:ring-[#4ade80]/25"
                     >
                       {LEARNING_TOPICS.map((topic) => (
-                        <option key={topic} value={topic} className="bg-[#0d2a3d] text-[#d7f0ff]">
+                        <option key={topic} value={topic} className="bg-[#082d20] text-[#dcfce7]">
                           {topic}
                         </option>
                       ))}
@@ -230,7 +230,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
                 </p>
               )}
               {resetMessage && (
-                <p role="status" className="rounded-lg bg-[#e8fff5] px-2 py-1.5 text-[11px] font-medium text-[#087f5b]">
+                <p role="status" className="rounded-lg bg-[#dcfce7] px-2 py-1.5 text-[11px] font-medium text-[#166534]">
                   {resetMessage}
                 </p>
               )}
@@ -238,19 +238,19 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-1 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#2aa3ff] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_0_25px_rgba(42,163,255,0.45)] transition hover:bg-[#1a8eef] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#22c55e] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-[#052e16] shadow-[0_0_25px_rgba(34,197,94,0.4)] transition hover:bg-[#4ade80] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isSignIn ? "Login" : "Sign Up"}
               </button>
             </form>
 
-            <div className="mt-4 text-center text-[11px] font-medium text-[#a8d9f7]">
+            <div className="mt-3 text-center text-[11px] font-medium text-[#b9d7cb] sm:mt-4">
               {isSignIn ? "Need an account? " : "Already have an account? "}
               <button
                 type="button"
                 onClick={() => switchMode(isSignIn ? "register" : "signin")}
-                className="cursor-pointer font-bold text-[#6ad0ff] hover:text-[#9fe5ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ec8ff]"
+                className="min-h-0 cursor-pointer font-bold text-[#86efac] hover:text-[#dcfce7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ade80]"
               >
                 {isSignIn ? "Sign Up" : "Login"}
               </button>
@@ -282,7 +282,7 @@ function TextInput({
       type={type}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className="min-h-11 w-full rounded-full border border-[#3b9af2]/70 bg-[#102a3d]/90 px-4 py-2.5 text-sm text-[#eaf8ff] placeholder:text-[#7db7dd] outline-none transition focus:border-[#6ad0ff] focus:ring-2 focus:ring-[#6ad0ff]/30"
+      className="min-h-11 w-full rounded-full border border-[#2b9b63]/80 bg-[#0b3022]/95 px-4 py-2.5 text-sm text-[#f0fff5] placeholder:text-[#9ed5b5] outline-none transition focus:border-[#86efac] focus:ring-2 focus:ring-[#4ade80]/30"
     />
   );
 }
@@ -293,7 +293,7 @@ function PasswordToggle({ shown, onToggle }: { shown: boolean; onToggle: () => v
       type="button"
       onClick={onToggle}
       aria-label={shown ? "Hide password" : "Show password"}
-      className="absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 cursor-pointer place-items-center text-[#9fe5ff] transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ec8ff]"
+      className="absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 cursor-pointer place-items-center text-[#86efac] transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4ade80]"
     >
       {shown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
     </button>
