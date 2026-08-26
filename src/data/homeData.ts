@@ -109,6 +109,21 @@ export const whyChooseUs = [
 
 export const featuredProducts = ["Beans", "Maize", "Rice", "Tomatoes", "Coffee", "Potatoes"];
 
+export const rwandaCrops = [
+  "Maize", "Beans", "Rice", "Wheat", "Sorghum", "Cassava", "Sweet potatoes", "Irish potatoes",
+  "Tomatoes", "Onions", "Cabbage", "Carrots", "Peas", "French beans", "Bananas", "Avocado",
+  "Passion fruit", "Mangoes", "Pineapple", "Coffee", "Tea", "Pyrethrum", "Soybeans", "Groundnuts",
+  "Sunflower", "Sugarcane", "Mushrooms", "Chili peppers", "Eggplant", "Amaranth",
+] as const;
+
+export const learningCourses = [
+  { title: "Crop Health and Disease Recognition", duration: "25 min", summary: "Scout leaves, stems, roots, and fruit so you can identify problems early.", steps: ["Inspect a few plants in every part of the field twice a week.", "Record the crop, symptoms, location, and date with a photo.", "Separate badly affected plants and ask an extension officer for confirmation."] },
+  { title: "Safe Treatment and Pest Management", duration: "30 min", summary: "Choose safe treatment steps, protect your family, and reduce pesticide misuse.", steps: ["Start with clean seed, field hygiene, spacing, rotation, and hand removal.", "Use only an approved product and follow its label dose and waiting period.", "Wear protective clothing, keep children away, and never pour leftovers into water."] },
+  { title: "Healthy Soil and Better Yields", duration: "20 min", summary: "Improve soil fertility with rotation, compost, mulch, and responsible nutrients.", steps: ["Rotate crops and keep soil covered with mulch or suitable living cover.", "Return mature compost and manure to the field in the correct amount.", "Apply fertilizer after checking crop needs, soil condition, and rainfall timing."] },
+  { title: "Water, Weather, and Climate-Smart Farming", duration: "18 min", summary: "Plan planting, irrigation, drainage, and field work around changing weather.", steps: ["Plant with the season forecast and choose varieties suited to the district.", "Water early, conserve moisture with mulch, and keep excess water draining.", "Avoid spraying before rain and protect harvested crops from wet conditions."] },
+  { title: "Harvest, Storage, and Market Readiness", duration: "22 min", summary: "Reduce post-harvest loss and prepare clean, quality produce for buyers.", steps: ["Harvest at the right maturity and keep damaged produce separate.", "Dry grains fully and store them in clean, dry, pest-safe containers.", "Compare district prices, grade produce honestly, and keep simple sales records."] },
+] as const;
+
 export const rwandaDistricts = [
   "Gasabo",
   "Kicukiro",

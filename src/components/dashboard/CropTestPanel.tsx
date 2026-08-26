@@ -62,6 +62,7 @@ export function CropTestPanel() {
       diagnosis.set("diseaseName", instantResult.diseaseName);
       diagnosis.set("confidence", instantResult.confidence);
       diagnosis.set("suggestion", instantResult.treatment);
+      diagnosis.set("collectionDecision", instantResult.collectionDecision);
       await diagnosis.save();
 
       setResult(instantResult);

@@ -1,18 +1,21 @@
 import Parse from "../../parse";
-import { Bell, CloudSun, GraduationCap, Leaf, Search, ShieldCheck, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Bell, Bot, CloudSun, DollarSign, GraduationCap, Leaf, Search, ShieldCheck, TrendingUp, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CropTestPanel } from "./CropTestPanel";
+import { BroadcastCenter } from "./BroadcastCenter";
 import { dashboardSidebarItems, DashboardTab } from "./dashboardTypes";
 import { DashboardSidebar } from "./DashboardSidebar";
+import { FarmerLearningCenter } from "./FarmerLearningCenter";
 import { ProfilePanel } from "./ProfilePanel";
 import { WeatherControlPanel } from "./WeatherControlPanel";
 import { fetchMarketPrices, MarketPriceRow, updateMarketPrice } from "../../lib/marketPrices";
 
 type FarmerDashboardProps = { onLogout: () => void; isAdmin: boolean; onOpenMarketplace: () => void };
 type ProfileRow = { id: string; fullName: string; email: string; role: string; status: string; learningTopic: string };
-type DiagnosisRow = { id: string; cropName: string; diseaseName: string; confidence: number; createdAt: string };
+type DiagnosisRow = { id: string; cropName: string; diseaseName: string; confidence: number; treatment: string; collectionDecision: string; createdAt: string };
 const MONTHLY_TREND = [{ month: "Jan", sales: 42, diagnoses: 24 }, { month: "Feb", sales: 59, diagnoses: 31 }, { month: "Mar", sales: 66, diagnoses: 45 }, { month: "Apr", sales: 72, diagnoses: 53 }, { month: "May", sales: 81, diagnoses: 61 }, { month: "Jun", sales: 94, diagnoses: 78 }];
+const MARKET_OVERVIEW = [{ crop: "Beans", change: "+4.8%", direction: "up" }, { crop: "Maize", change: "+2.1%", direction: "up" }, { crop: "Tomatoes", change: "-1.4%", direction: "down" }];
 
 function rowId(prefix: string, id?: string) { return id || `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
 
@@ -35,7 +38,7 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: Farmer
         const profileQuery = new Parse.Query("FarmerProfile"); profileQuery.descending("createdAt"); profileQuery.limit(1000);
         const [diagnoses, foundProfiles] = await Promise.all([diagnosisQuery.find(), isAdmin ? profileQuery.find() : Promise.resolve([])]);
         if (!alive) return;
-        setRecentDiagnoses(diagnoses.map((item) => ({ id: rowId("diagnosis", item.id), cropName: String(item.get("cropName") || "Unknown crop"), diseaseName: String(item.get("diseaseName") || "Pending result"), confidence: Number(item.get("confidence") || 0), createdAt: new Date(item.createdAt || Date.now()).toLocaleDateString() })));
+        setRecentDiagnoses(diagnoses.map((item) => ({ id: rowId("diagnosis", item.id), cropName: String(item.get("cropName") || "Unknown crop"), diseaseName: String(item.get("diseaseName") || "Pending result"), confidence: Number(item.get("confidence") || 0), treatment: String(item.get("suggestion") || "Follow up with your local agriculture extension officer."), collectionDecision: String(item.get("collectionDecision") || "Monitor the crop and re-test if symptoms continue."), createdAt: new Date(item.createdAt || Date.now()).toLocaleDateString() })));
         setProfiles(foundProfiles.map((item) => ({ id: rowId("profile", item.id), fullName: String(item.get("fullName") || "Farmer"), email: String(item.get("email") || "-"), role: String(item.get("role") || "farmer"), status: String(item.get("status") || "active"), learningTopic: String(item.get("learningTopic") || "General farming") })));
       } finally { if (alive) setLoading(false); }
     };
@@ -134,6 +137,8 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: Farmer
                 </article>
               </div>
 
+              <DashboardOverview diagnoses={recentDiagnoses} profiles={profiles} />
+
               <RecentDiagnoses rows={recentDiagnoses} loading={loading} />
               {isAdmin && <AdminControlCenter farmerCount={profiles.length} onSelectTab={setActiveTab} />}
             </>
@@ -147,13 +152,9 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: Farmer
             </article>
           )}
           {activeTab === "Crop Prices" && (isAdmin ? <AdminMarketPricePanel /> : <InfoCard title="Crop Prices" text="Market prices are managed by the two approved platform administrators." />)}
-          {activeTab === "Learning Center" && (
-            <InfoCard
-              title="Learning recommendations"
-              text={`Your selected focus: ${String(currentUser.get("learningTopic") || "Pest & Disease Management")}. New practical lessons are ready for your farm.`}
-            />
-          )}
-          {["Sell Products", "Messages", "Settings"].includes(activeTab) && (
+          {activeTab === "Learning Center" && <FarmerLearningCenter userId={currentUser.id || currentUser.getUsername() || "farmer"} />}
+          {activeTab === "Messages" && <BroadcastCenter isAdmin={isAdmin} />}
+          {["Sell Products", "Settings"].includes(activeTab) && (
             <InfoCard
               title={activeTab}
               text="This workspace is ready for your farming activity. Live marketplace and weather information remains connected."
@@ -166,7 +167,58 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: Farmer
   );
 }
 
-function RecentDiagnoses({ rows, loading }: { rows: DiagnosisRow[]; loading: boolean }) { return <article className="rounded-2xl bg-white p-5 shadow-[0_6px_25px_rgba(34,44,80,0.06)] dark:bg-[#123b2f] 2xl:p-7"><h2 className="text-xl font-bold">Recent crop diagnosis</h2><div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{loading ? <p className="text-sm text-[#87939e]">Loading activity...</p> : rows.length ? rows.map((row) => <div key={row.id} className="rounded-xl bg-[#f5f7fb] p-4 dark:bg-[#0b261d]"><p className="font-bold">{row.cropName}</p><p className="mt-1 text-sm text-[#667581] dark:text-[#b9d7cb]">{row.diseaseName}</p><p className="mt-3 text-xs font-bold text-[#7057bf]">{row.confidence}% confidence · {row.createdAt}</p></div>) : <p className="text-sm text-[#87939e]">Your crop checks will appear here.</p>}</div></article>; }
+function DashboardOverview({ diagnoses, profiles }: { diagnoses: DiagnosisRow[]; profiles: ProfileRow[] }) {
+  const healthyCount = diagnoses.filter((diagnosis) => diagnosis.diseaseName.toLowerCase().includes("healthy")).length;
+  const diseaseCount = diagnoses.length - healthyCount;
+  const activities = diagnoses.slice(0, 3).map((diagnosis) => ({
+    label: `${diagnosis.cropName} diagnosis completed`,
+    detail: `${diagnosis.diseaseName} · ${diagnosis.createdAt}`,
+  }));
+  if (profiles.length && !activities.length) activities.push({ label: `${profiles[0].fullName} joined the platform`, detail: "New farmer profile" });
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-2 2xl:gap-5">
+      <article className="rounded-[18px] border border-[#f1dfb9] bg-[#fffaf0] p-4 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#5a4821] dark:bg-[#2a2412] 2xl:p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f8c967] text-[#60440c]"><AlertTriangle className="h-5 w-5" /></span>
+          <div><h2 className="text-xl font-bold">Farm alerts</h2><p className="text-sm text-[#7b6b48] dark:text-[#d8c895]">Important updates for your farm</p></div>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-xl bg-white/75 p-3 dark:bg-white/10"><p className="font-semibold text-[#785a1b] dark:text-[#f5df9c]">Pest warning</p><p className="mt-1 text-xs text-[#8b7b58] dark:text-[#d8c895]">Check crops for early signs</p></div>
+          <div className="rounded-xl bg-white/75 p-3 dark:bg-white/10"><p className="font-semibold text-[#785a1b] dark:text-[#f5df9c]">Rain expected</p><p className="mt-1 text-xs text-[#8b7b58] dark:text-[#d8c895]">Plan field work around showers</p></div>
+        </div>
+      </article>
+
+      <article className="rounded-[18px] border border-[#d7e8e2] bg-white p-4 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] 2xl:p-5">
+        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#dff4eb] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]"><Leaf className="h-5 w-5" /></span><div><h2 className="text-xl font-bold">Crop health</h2><p className="text-sm text-[#6f817d]">Latest diagnosis summary</p></div></div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center"><HealthMetric label="Maize" value="92%" tone="good" /><HealthMetric label="Beans" value="74%" tone="watch" /><HealthMetric label="Tomatoes" value="48%" tone="risk" /></div>
+        <p className="mt-3 text-xs text-[#6f817d]">{healthyCount} healthy and {diseaseCount} needing attention in recent checks.</p>
+      </article>
+
+      <article className="rounded-[18px] border border-[#d7e8e2] bg-white p-4 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] 2xl:p-5">
+        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#e8e1fb] text-[#7057bf]"><Bot className="h-5 w-5" /></span><div><h2 className="text-xl font-bold">AI detection</h2><p className="text-sm text-[#6f817d]">Your crop analysis activity</p></div></div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center"><HealthMetric label="Scans" value={String(diagnoses.length)} tone="neutral" /><HealthMetric label="Healthy" value={String(healthyCount)} tone="good" /><HealthMetric label="Diseases" value={String(diseaseCount)} tone="risk" /></div>
+      </article>
+
+      <article className="rounded-[18px] border border-[#d7e8e2] bg-white p-4 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] 2xl:p-5">
+        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#dff4eb] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]"><DollarSign className="h-5 w-5" /></span><div><h2 className="text-xl font-bold">Market prices</h2><p className="text-sm text-[#6f817d]">Weekly movement</p></div></div>
+        <div className="mt-4 space-y-2">{MARKET_OVERVIEW.map((item) => <div key={item.crop} className="flex items-center justify-between rounded-xl bg-[#f5f8f7] px-3 py-2.5 dark:bg-[#0b261d]"><span className="font-semibold">{item.crop}</span><span className={item.direction === "up" ? "font-bold text-[#18794e] dark:text-[#86efac]" : "font-bold text-[#d64545]"}>{item.direction === "up" ? "↑" : "↓"} {item.change}</span></div>)}</div>
+      </article>
+
+      <article className="rounded-[18px] border border-[#d7e8e2] bg-white p-4 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] xl:col-span-2 2xl:p-5">
+        <div className="flex items-center justify-between gap-3"><div><h2 className="text-xl font-bold">Recent farmer activity</h2><p className="text-sm text-[#6f817d]">The latest work recorded on the platform</p></div><Users className="h-6 w-6 text-[#2a7d70]" /></div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">{activities.length ? activities.map((activity) => <div key={`${activity.label}-${activity.detail}`} className="rounded-xl bg-[#f5f8f7] p-3 dark:bg-[#0b261d]"><p className="font-semibold">{activity.label}</p><p className="mt-1 text-xs text-[#6f817d] dark:text-[#b9d7cb]">{activity.detail}</p></div>) : <p className="text-sm text-[#6f817d]">New farmer activity will appear here.</p>}</div>
+      </article>
+    </div>
+  );
+}
+
+function HealthMetric({ label, value, tone }: { label: string; value: string; tone: "good" | "watch" | "risk" | "neutral" }) {
+  const toneClass = tone === "good" ? "text-[#18794e] dark:text-[#86efac]" : tone === "watch" ? "text-[#b7791f]" : tone === "risk" ? "text-[#d64545]" : "text-[#7057bf]";
+  return <div className="rounded-xl bg-[#f5f8f7] p-2.5 dark:bg-[#0b261d]"><p className="text-[11px] font-semibold text-[#6f817d]">{label}</p><p className={`mt-1 text-lg font-bold ${toneClass}`}>{value}</p></div>;
+}
+
+function RecentDiagnoses({ rows, loading }: { rows: DiagnosisRow[]; loading: boolean }) { return <article className="rounded-2xl bg-white p-5 shadow-[0_6px_25px_rgba(34,44,80,0.06)] dark:bg-[#123b2f] 2xl:p-7"><h2 className="text-xl font-bold">Your crop feedback</h2><p className="mt-1 text-sm text-[#667581] dark:text-[#b9d7cb]">Treatment and collection guidance for every crop you test.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{loading ? <p className="text-sm text-[#87939e]">Loading feedback...</p> : rows.length ? rows.map((row) => <div key={row.id} className="rounded-xl bg-[#f5f7fb] p-4 dark:bg-[#0b261d]"><div className="flex items-start justify-between gap-2"><p className="font-bold">{row.cropName}</p><span className="text-xs font-bold text-[#7057bf]">{row.confidence}%</span></div><p className="mt-1 text-sm font-semibold text-[#667581] dark:text-[#b9d7cb]">{row.diseaseName}</p><p className="mt-3 text-xs leading-5 text-[#465f5a] dark:text-[#d5eee5]"><span className="font-bold">Treatment: </span>{row.treatment}</p><p className="mt-2 text-xs leading-5 text-[#465f5a] dark:text-[#d5eee5]"><span className="font-bold">Harvest guidance: </span>{row.collectionDecision}</p><p className="mt-3 text-[11px] text-[#87939e]">Tested {row.createdAt}</p></div>) : <p className="text-sm text-[#87939e]">Your crop test feedback will appear here.</p>}</div></article>; }
 function AdminControlCenter({ farmerCount, onSelectTab }: { farmerCount: number; onSelectTab: (tab: DashboardTab) => void }) {
   return <article className="rounded-[18px] border border-[#b9dfcf] bg-[#eaf8f2] p-5 shadow-[0_8px_18px_rgba(17,34,27,0.05)] dark:border-[#1d5743] dark:bg-[#123b2f] 2xl:p-7">
     <div className="flex flex-wrap items-start justify-between gap-3">

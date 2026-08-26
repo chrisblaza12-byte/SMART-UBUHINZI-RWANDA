@@ -110,7 +110,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-[#031b13]/95 p-2 backdrop-blur-sm sm:p-5">
+    <div className="auth-scrollbar-hidden fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-[#031b13]/95 p-2 backdrop-blur-sm sm:p-5">
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -152,7 +152,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
           <div className="absolute right-6 top-1/2 h-10 w-3 -translate-y-1/2 rounded-full bg-[#86efac]/60 shadow-[0_0_10px_rgba(134,239,172,0.7)] sm:right-11" />
           <div className="absolute inset-[42px] rounded-full border border-[#4ade80]/35" />
 
-          <div className="relative z-10 max-h-[calc(100%_-_56px)] w-[82%] max-w-[300px] overflow-y-auto rounded-[34px] px-2 py-3 sm:px-3 sm:py-4">
+          <div className="auth-scrollbar-hidden relative z-10 max-h-[calc(100%_-_56px)] w-[82%] max-w-[300px] overflow-y-auto rounded-[34px] px-2 py-3 sm:px-3 sm:py-4">
             <h1 className="mb-3 text-center text-3xl font-bold tracking-wide text-[#dcfce7] sm:mb-4 sm:text-4xl">
               {isSignIn ? "Login" : "Register"}
             </h1>
@@ -261,7 +261,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-1 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#22c55e] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-[#052e16] shadow-[0_0_25px_rgba(34,197,94,0.4)] transition hover:bg-[#4ade80] disabled:cursor-not-allowed disabled:opacity-60"
+                className={`mt-1 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold uppercase tracking-[0.12em] shadow-[0_0_25px_rgba(34,197,94,0.4)] transition disabled:cursor-not-allowed disabled:opacity-60 ${isSignIn ? "bg-white text-[#052e16] hover:bg-[#f0fff5]" : "bg-[#22c55e] text-[#052e16] hover:bg-[#4ade80]"}`}
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isSignIn ? "Login" : "Sign Up"}

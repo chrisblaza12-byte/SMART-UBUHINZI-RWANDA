@@ -42,19 +42,27 @@ export default function App() {
   }, [language]);
 
   useEffect(() => {
+    let frameId = 0;
     const onScroll = () => {
       if (appView !== "home") return;
-      const current = sectionIds.find((id) => {
-        const element = document.getElementById(id);
-        if (!element) return false;
-        const rect = element.getBoundingClientRect();
-        return rect.top <= 140 && rect.bottom >= 140;
+      if (frameId) return;
+      frameId = requestAnimationFrame(() => {
+        frameId = 0;
+        const current = sectionIds.find((id) => {
+          const element = document.getElementById(id);
+          if (!element) return false;
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 140 && rect.bottom >= 140;
+        });
+        if (current) setActiveSection(current);
       });
-      if (current) setActiveSection(current);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frameId) cancelAnimationFrame(frameId);
+    };
   }, [appView]);
 
   useEffect(() => {
