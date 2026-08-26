@@ -70,6 +70,7 @@ export function HomeFooter({ onGoToSection, onGoToMarketplace, onGoToDashboard }
                     <Mail className="h-4 w-4" />
                   </span>
                   <span>ndayisabapatrick75@gmail.com</span>
+                   <span>mucyoolivier4@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[#1bbf7a]/15 text-[#7ff0b8]">
@@ -157,8 +158,12 @@ export function HomeFooter({ onGoToSection, onGoToMarketplace, onGoToDashboard }
             </div>
 
             <div className="mt-6 space-y-2 text-sm text-[#dfe7ff]">
-              <p className="inline-flex items-center gap-2"><Phone className="h-4 w-4 text-[#7ff0b8]" /> +250786540493</p>
+
+               <p className="inline-flex items-center gap-2"><Phone className="h-4 w-4 text-[#7ff0b8]" /> +1 (734) 757-5437</p><br></br>
+
+                <p className="inline-flex items-center gap-2"><Phone className="h-4 w-4 text-[#7ff0b8]" /> +250786540493</p><br></br>
               <p className="inline-flex items-center gap-2"><Mail className="h-4 w-4 text-[#7ff0b8]" /> ndayisabapatrick75@gmail.com</p>
+               <p className="inline-flex items-center gap-2"><Mail className="h-4 w-4 text-[#7ff0b8]" /> mucyoolivier4@gmail.com</p>
             </div>
           </div>
 
