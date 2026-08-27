@@ -100,4 +100,49 @@ Parse.Cloud.beforeSave("CropDiagnosis", async (request) => {
   if (request.original) request.object.set("createdBy", request.original.get("createdBy"));
 });
 
+Parse.Cloud.beforeSave("BroadcastMessage", async (request) => {
+  const user = request.user;
+  if (!user || !ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()))) {
+    throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "Only the two platform administrators can broadcast messages.");
+  }
+  if (!String(request.object.get("title") || "").trim() || !String(request.object.get("body") || "").trim()) {
+    throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "A broadcast title and message are required.");
+  }
+  request.object.set("audience", "farmers");
+  request.object.set("createdBy", user);
+  if (!request.original) {
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    acl.setWriteAccess(user, true);
+    request.object.setACL(acl);
+  }
+});
+
+Parse.Cloud.beforeSave("MarketplaceContact", async (request) => {
+  const user = request.user;
+  const admin = user && ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()));
+  if (!user) throw new Parse.Error(Parse.Error.SESSION_MISSING, "Sign in to send or answer a contact message.");
+  if (!request.original) {
+    if (admin || request.object.get("sender")?.id !== user.id || !String(request.object.get("message") || "").trim()) {
+      throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "Only a farmer can start a contact message.");
+    }
+    const acl = new Parse.ACL();
+    acl.setReadAccess(user, true);
+    acl.setRoleReadAccess(ADMIN_ROLE, true);
+    acl.setWriteAccess(user, true);
+    acl.setRoleWriteAccess(ADMIN_ROLE, true);
+    request.object.setACL(acl);
+  } else if (!admin) {
+    request.object.set("sender", request.original.get("sender"));
+    request.object.set("response", request.original.get("response"));
+    request.object.set("respondedBy", request.original.get("respondedBy"));
+    request.object.set("status", request.original.get("status"));
+  } else {
+    request.object.set("sender", request.original.get("sender"));
+    request.object.set("message", request.original.get("message"));
+    request.object.set("respondedBy", user);
+    request.object.set("status", String(request.object.get("response") || "").trim() ? "answered" : "new");
+  }
+});
+
 Parse.Cloud.define("hello", async () => ({ message: "Smart Ubuhinzi backend is ready." }));
