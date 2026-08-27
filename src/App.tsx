@@ -121,7 +121,7 @@ export default function App() {
       />
 
       {appView === "dashboard" && user ? (
-        <FarmerDashboard onLogout={handleLogout} isAdmin={isAdmin} onOpenMarketplace={() => setAppView("marketplace")} />
+        <FarmerDashboard onLogout={handleLogout} isAdmin={isAdmin} onOpenMarketplace={() => setAppView("marketplace")} language={language} />
       ) : appView === "marketplace" ? (
         <MarketplacePage onOpenAuth={() => setShowAuth(true)} language={language} />
       ) : (

@@ -1,10 +1,11 @@
-import { CheckCircle2, Clock3, GraduationCap, Leaf } from "lucide-react";
+import { CheckCircle2, Clock3, Download, GraduationCap, Leaf, LockKeyhole } from "lucide-react";
 import { useEffect, useState } from "react";
 import { learningCourses, rwandaCrops } from "../../data/homeData";
+import { Language } from "../../lib/translations";
 
-type FarmerLearningCenterProps = { userId: string };
+type FarmerLearningCenterProps = { userId: string; language: Language };
 
-export function FarmerLearningCenter({ userId }: FarmerLearningCenterProps) {
+export function FarmerLearningCenter({ userId, language }: FarmerLearningCenterProps) {
   const storageKey = `learning-progress-${userId}`;
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
@@ -17,39 +18,54 @@ export function FarmerLearningCenter({ userId }: FarmerLearningCenterProps) {
   }, [storageKey]);
 
   const completedCount = learningCourses.filter((course) => completed[course.title]).length;
-  const toggleCourse = (title: string) => {
+  const nextCourseIndex = learningCourses.findIndex((course) => !completed[course.title]);
+  const allComplete = completedCount === learningCourses.length;
+  const toggleCourse = (title: string, index: number) => {
+    if (!completed[title] && index !== nextCourseIndex) return;
     setCompleted((current) => {
       const next = { ...current, [title]: !current[title] };
       localStorage.setItem(storageKey, JSON.stringify(next));
       return next;
     });
   };
+  const isKinyarwanda = language === "rw";
+  const text = isKinyarwanda
+    ? { required: "Amasomo ategetswe ku bahinzi", heading: "Wige kurinda ibihingwa byose", intro: "Rangiza aya masomo ngiro kugira ngo umenye ibibazo by'ibihingwa, uko bivurwa neza n'uko warinda umusaruro.", completed: "Byarangiye", course: "Isomo", locked: "Banza urangize isomo ribanza", finish: "Emeza ko urangije module", done: "Module yararangiye", certificate: "Icyemezo cy'amahugurwa", certificateText: "Warangije amasomo yose yo kurinda ibihingwa.", download: "Kuramo icyemezo", crops: "Ibihingwa bihingwa mu Rwanda", cropsText: "Koresha aya mazina igihe usoma amasomo cyangwa usuzuma igihingwa." }
+    : { required: "Required farmer training", heading: "Learn how to protect every crop", intro: "Complete these practical courses to recognize crop problems, choose safer treatment steps, and protect your harvest.", completed: "Completed", course: "Course", locked: "Complete the previous course first", finish: "Mark module complete", done: "Module completed", certificate: "Farmer training certificate", certificateText: "You completed every course on protecting crops.", download: "Download certificate", crops: "Crops cultivated in Rwanda", cropsText: "Use these crop names when reviewing lessons or submitting a diagnosis." };
 
   return (
     <div className="space-y-4">
       <article className="rounded-[18px] bg-[#103b34] p-5 text-white shadow-[0_12px_22px_rgba(16,59,52,0.18)] 2xl:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#a8e6d2]">Required farmer training</p><h2 className="mt-2 text-2xl font-bold">Learn how to protect every crop</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#d5f0ea]">Complete these practical courses to recognize crop problems, choose safer treatment steps, and protect your harvest.</p></div>
-          <div className="rounded-xl bg-white/10 px-4 py-3 text-center"><p className="text-2xl font-bold">{completedCount}/{learningCourses.length}</p><p className="text-[11px] uppercase tracking-[0.12em] text-[#bfe5db]">Completed</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#a8e6d2]">{text.required}</p><h2 className="mt-2 text-2xl font-bold">{text.heading}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#d5f0ea]">{text.intro}</p></div>
+          <div className="rounded-xl bg-white/10 px-4 py-3 text-center"><p className="text-2xl font-bold">{completedCount}/{learningCourses.length}</p><p className="text-[11px] uppercase tracking-[0.12em] text-[#bfe5db]">{text.completed}</p></div>
         </div>
       </article>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        {learningCourses.map((course) => {
+        {learningCourses.map((course, index) => {
           const isComplete = Boolean(completed[course.title]);
-          return <article key={course.title} className="rounded-[18px] border border-[#d7e8e2] bg-white p-5 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f]">
-            <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#dff4eb] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]"><GraduationCap className="h-5 w-5" /></span><div className="min-w-0"><h3 className="font-bold">{course.title}</h3><p className="mt-1 flex items-center gap-1 text-xs text-[#6f817d]"><Clock3 className="h-3.5 w-3.5" /> {course.duration}</p></div></div>
-            <p className="mt-4 text-sm leading-6 text-[#647a78] dark:text-[#b9d7cb]">{course.summary}</p>
-            <ol className="mt-3 space-y-1.5 text-xs leading-5 text-[#526b65] dark:text-[#c5e2d8]">{course.steps.map((step, index) => <li key={step}><span className="mr-1 font-bold text-[#18794e]">{index + 1}.</span>{step}</li>)}</ol>
-            <button type="button" onClick={() => toggleCourse(course.title)} className={`mt-4 inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${isComplete ? "bg-[#dcfce7] text-[#18794e] hover:bg-[#bbf7d0]" : "bg-[#22c55e] text-[#052e16] hover:bg-[#4ade80]"}`}>
-              {isComplete && <CheckCircle2 className="h-4 w-4" />}{isComplete ? "Course completed" : "Mark course complete"}
+          const isUnlocked = index === 0 || Boolean(completed[learningCourses[index - 1].title]);
+          const title = isKinyarwanda ? course.titleRw : course.title;
+          const summary = isKinyarwanda ? course.summaryRw : course.summary;
+          const steps = isKinyarwanda ? course.stepsRw : course.steps;
+          return <article key={course.title} className={`rounded-[18px] border p-5 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] ${isUnlocked ? "border-[#d7e8e2] bg-white" : "border-[#e2e8e5] bg-[#f5f8f7] opacity-75 dark:bg-[#0b261d]"}`}>
+            <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#dff4eb] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]">{isUnlocked ? <GraduationCap className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}</span><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#18794e]">{text.course} {index + 1}</p><h3 className="font-bold">{title}</h3><p className="mt-1 flex items-center gap-1 text-xs text-[#6f817d]"><Clock3 className="h-3.5 w-3.5" /> {course.duration}</p></div></div>
+            <p className="mt-4 text-sm leading-6 text-[#647a78] dark:text-[#b9d7cb]">{summary}</p>
+            <ol className="mt-3 space-y-1.5 text-xs leading-5 text-[#526b65] dark:text-[#c5e2d8]">{steps.map((step, stepIndex) => <li key={step}><span className="mr-1 font-bold text-[#18794e]">{stepIndex + 1}.</span>{step}</li>)}</ol>
+            <button type="button" disabled={!isUnlocked || isComplete} onClick={() => toggleCourse(course.title, index)} className={`mt-4 inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed ${isComplete ? "bg-[#dcfce7] text-[#18794e]" : isUnlocked ? "bg-[#22c55e] text-[#052e16] hover:bg-[#4ade80]" : "bg-[#dce6e2] text-[#647a78]"}`}>
+              {isComplete ? <CheckCircle2 className="h-4 w-4" /> : !isUnlocked ? <LockKeyhole className="h-4 w-4" /> : null}{isComplete ? text.done : isUnlocked ? text.finish : text.locked}
             </button>
           </article>;
         })}
       </div>
 
+      {allComplete && <article className="rounded-[18px] border-2 border-[#d9ad4b] bg-[#fffaf0] p-6 text-center shadow-[0_12px_25px_rgba(121,86,17,0.12)] dark:border-[#967527] dark:bg-[#2a2412] 2xl:p-8">
+        <GraduationCap className="mx-auto h-12 w-12 text-[#b7791f]" /><h2 className="mt-3 text-2xl font-bold text-[#785a1b] dark:text-[#f5df9c]">{text.certificate}</h2><p className="mt-2 text-sm text-[#8b7b58] dark:text-[#d8c895]">{text.certificateText}</p><p className="mt-2 font-semibold text-[#785a1b] dark:text-[#f5df9c]">{userId}</p><button type="button" onClick={() => window.print()} className="mt-5 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl bg-[#b7791f] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#986515]"><Download className="h-4 w-4" />{text.download}</button>
+      </article>}
+
       <article className="rounded-[18px] border border-[#d7e8e2] bg-white p-5 shadow-[0_8px_18px_rgba(17,34,27,0.04)] dark:border-[#1d5743] dark:bg-[#123b2f] 2xl:p-7">
-        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eaf8f2] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]"><Leaf className="h-5 w-5" /></span><div><h2 className="text-xl font-bold">Crops cultivated in Rwanda</h2><p className="text-sm text-[#6f817d]">Use these crop names when reviewing lessons or submitting a diagnosis.</p></div></div>
+        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eaf8f2] text-[#18794e] dark:bg-[#1d5743] dark:text-[#86efac]"><Leaf className="h-5 w-5" /></span><div><h2 className="text-xl font-bold">{text.crops}</h2><p className="text-sm text-[#6f817d]">{text.cropsText}</p></div></div>
         <div className="mt-5 flex flex-wrap gap-2">{rwandaCrops.map((crop) => <span key={crop} className="rounded-full border border-[#b9dfcf] bg-[#f5fbf8] px-3 py-1.5 text-xs font-semibold text-[#28664f] dark:border-[#28664f] dark:bg-[#0b261d] dark:text-[#b9d7cb]">{crop}</span>)}</div>
       </article>
     </div>

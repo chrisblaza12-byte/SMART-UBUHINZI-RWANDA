@@ -10,8 +10,9 @@ import { FarmerLearningCenter } from "./FarmerLearningCenter";
 import { ProfilePanel } from "./ProfilePanel";
 import { WeatherControlPanel } from "./WeatherControlPanel";
 import { fetchMarketPrices, MarketPriceRow, updateMarketPrice } from "../../lib/marketPrices";
+import { Language } from "../../lib/translations";
 
-type FarmerDashboardProps = { onLogout: () => void; isAdmin: boolean; onOpenMarketplace: () => void };
+type FarmerDashboardProps = { onLogout: () => void; isAdmin: boolean; onOpenMarketplace: () => void; language: Language };
 type ProfileRow = { id: string; fullName: string; email: string; role: string; status: string; learningTopic: string };
 type DiagnosisRow = { id: string; cropName: string; diseaseName: string; confidence: number; treatment: string; collectionDecision: string; createdAt: string };
 const MONTHLY_TREND = [{ month: "Jan", sales: 42, diagnoses: 24 }, { month: "Feb", sales: 59, diagnoses: 31 }, { month: "Mar", sales: 66, diagnoses: 45 }, { month: "Apr", sales: 72, diagnoses: 53 }, { month: "May", sales: 81, diagnoses: 61 }, { month: "Jun", sales: 94, diagnoses: 78 }];
@@ -19,7 +20,7 @@ const MARKET_OVERVIEW = [{ crop: "Beans", change: "+4.8%", direction: "up" }, { 
 
 function rowId(prefix: string, id?: string) { return id || `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
 
-export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: FarmerDashboardProps) {
+export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace, language }: FarmerDashboardProps) {
   const currentUser = Parse.User.current();
   const [activeTab, setActiveTab] = useState<DashboardTab>("Dashboard");
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
@@ -152,7 +153,7 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace }: Farmer
             </article>
           )}
           {activeTab === "Crop Prices" && (isAdmin ? <AdminMarketPricePanel /> : <InfoCard title="Crop Prices" text="Market prices are managed by the two approved platform administrators." />)}
-          {activeTab === "Learning Center" && <FarmerLearningCenter userId={currentUser.id || currentUser.getUsername() || "farmer"} />}
+          {activeTab === "Learning Center" && <FarmerLearningCenter userId={currentUser.id || currentUser.getUsername() || "farmer"} language={language} />}
           {activeTab === "Messages" && <BroadcastCenter isAdmin={isAdmin} />}
           {["Sell Products", "Settings"].includes(activeTab) && (
             <InfoCard
