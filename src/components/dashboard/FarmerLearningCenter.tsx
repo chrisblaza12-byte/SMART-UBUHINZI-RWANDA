@@ -1,6 +1,6 @@
-import { CheckCircle2, Clock3, Download, GraduationCap, Leaf, LockKeyhole } from "lucide-react";
+import { CheckCircle2, CheckCircle, Clock3, Download, GraduationCap, Leaf, LockKeyhole } from "lucide-react";
 import { useEffect, useState } from "react";
-import { learningCourses, rwandaCrops } from "../../data/homeData";
+import { learningCourses, learningQuizzes, rwandaCrops } from "../../data/homeData";
 import { Language } from "../../lib/translations";
 
 type FarmerLearningCenterProps = { userId: string; language: Language };
@@ -9,6 +9,9 @@ export function FarmerLearningCenter({ userId, language }: FarmerLearningCenterP
   const storageKey = `learning-progress-v2-${userId}`;
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [modules, setModules] = useState<Record<string, boolean>>({});
+  const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [quizMessage, setQuizMessage] = useState("");
 
   useEffect(() => {
     try {
@@ -31,6 +34,21 @@ export function FarmerLearningCenter({ userId, language }: FarmerLearningCenterP
       return next;
     });
   };
+  const openModule = (courseIndex: number, moduleIndex: number) => {
+    const course = learningCourses[courseIndex];
+    const isUnlocked = courseIndex === nextCourseIndex && (moduleIndex === 0 || modules[`${course.title}-${moduleIndex - 1}`]);
+    if (completed[course.title] || !isUnlocked) return;
+    setActiveModule(`${courseIndex}-${moduleIndex}`);
+    setSelectedAnswer(null);
+    setQuizMessage("");
+  };
+  const submitQuiz = (courseIndex: number, moduleIndex: number) => {
+    if (selectedAnswer === null) return setQuizMessage(isKinyarwanda ? "Hitamo igisubizo mbere yo gukomeza." : "Choose an answer before continuing.");
+    const quiz = learningQuizzes[courseIndex][moduleIndex];
+    if (selectedAnswer !== quiz.answer) return setQuizMessage(isKinyarwanda ? "Igisubizo si cyo. Ongera usome module ugerageze." : "That answer is not correct. Review the module and try again.");
+    completeModule(learningCourses[courseIndex].title, moduleIndex);
+    setQuizMessage(isKinyarwanda ? "Ni byo! Module yarangiye." : "Correct! Module completed.");
+  };
   const completeCourse = (title: string, index: number) => {
     const course = learningCourses[index];
     const allModulesComplete = course.steps.every((_, moduleIndex) => modules[`${title}-${moduleIndex}`]);
@@ -43,8 +61,8 @@ export function FarmerLearningCenter({ userId, language }: FarmerLearningCenterP
   };
   const isKinyarwanda = language === "rw";
   const text = isKinyarwanda
-    ? { required: "Amasomo ategetswe ku bahinzi", heading: "Wige kurinda ibihingwa byose", intro: "Soma kandi urangize modules eshatu za buri somo. Iyo urangije isomo, ni bwo ufungura igice gikurikira.", completed: "Amasomo yarangiye", course: "Isomo", module: "Module", locked: "Banza urangize isomo ribanza", read: "Soma urangize module", moduleDone: "Module yarangiye", finish: "Emeza ko urangije isomo", done: "Isomo ryarangiye", certificate: "Icyemezo cy'amahugurwa", certificateText: "Warangije amasomo yose yo kurinda ibihingwa.", download: "Kuramo icyemezo", crops: "Ibihingwa bihingwa mu Rwanda", cropsText: "Koresha aya mazina igihe usoma amasomo cyangwa usuzuma igihingwa." }
-    : { required: "Required farmer training", heading: "Learn how to protect every crop", intro: "Read and complete all three modules in each course. Finish the course before the next chapter unlocks.", completed: "Courses completed", course: "Course", module: "Module", locked: "Complete the previous course first", read: "Read and complete module", moduleDone: "Module completed", finish: "Mark course complete", done: "Course completed", certificate: "Farmer training certificate", certificateText: "You completed every course on protecting crops.", download: "Download certificate", crops: "Crops cultivated in Rwanda", cropsText: "Use these crop names when reviewing lessons or submitting a diagnosis." };
+    ? { required: "Amasomo ategetswe ku bahinzi", heading: "Wige kurinda ibihingwa byose", intro: "Fungura kandi wige modules eshatu za buri somo, ukore quiz nyuma ya buri module. Iyo urangije isomo, ni bwo ufungura igice gikurikira.", completed: "Amasomo yarangiye", course: "Isomo", module: "Module", locked: "Banza urangize isomo ribanza", open: "Fungura module", moduleDone: "Module yarangiye", quiz: "Quiz ya module", submit: "Ohereza igisubizo", correct: "Ni byo!", finish: "Emeza ko urangije isomo", done: "Isomo ryarangiye", certificate: "Icyemezo cy'amahugurwa", certificateText: "Warangije amasomo yose yo kurinda ibihingwa.", download: "Kuramo icyemezo", crops: "Ibihingwa bihingwa mu Rwanda", cropsText: "Koresha aya mazina igihe usoma amasomo cyangwa usuzuma igihingwa." }
+    : { required: "Required farmer training", heading: "Learn how to protect every crop", intro: "Open and study all three modules in each course, then pass the quiz after every module. Complete the course before the next chapter unlocks.", completed: "Courses completed", course: "Course", module: "Module", locked: "Complete the previous course first", open: "Open module", moduleDone: "Module completed", quiz: "Module quiz", submit: "Submit answer", correct: "Correct!", finish: "Mark course complete", done: "Course completed", certificate: "Farmer training certificate", certificateText: "You completed every course on protecting crops.", download: "Download certificate", crops: "Crops cultivated in Rwanda", cropsText: "Use these crop names when reviewing lessons or submitting a diagnosis." };
 
   return (
     <div className="space-y-4">
@@ -69,7 +87,16 @@ export function FarmerLearningCenter({ userId, language }: FarmerLearningCenterP
             <div className="mt-3 space-y-2">{steps.map((step, stepIndex) => {
               const moduleKey = `${course.title}-${stepIndex}`;
               const moduleComplete = Boolean(modules[moduleKey]);
+              const moduleOpen = activeModule === `${index}-${stepIndex}`;
+              const quiz = learningQuizzes[index][stepIndex];
+              const quizQuestion = isKinyarwanda ? quiz.questionRw : quiz.question;
+              const quizOptions = isKinyarwanda ? quiz.optionsRw : quiz.options;
+              const previousModuleComplete = stepIndex === 0 || Boolean(modules[`${course.title}-${stepIndex - 1}`]);
               return <div key={step} className="rounded-xl border border-[#e3ece8] bg-[#f8fbfa] p-3 dark:border-[#1d5743] dark:bg-[#0b261d]"><p className="text-xs leading-5 text-[#526b65] dark:text-[#c5e2d8]"><span className="mr-1 font-bold text-[#18794e]">{text.module} {stepIndex + 1}:</span>{step}</p><button type="button" disabled={!isUnlocked || moduleComplete || (stepIndex > 0 && !modules[`${course.title}-${stepIndex - 1}`])} onClick={() => completeModule(course.title, stepIndex)} className={`mt-2 inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition disabled:cursor-not-allowed ${moduleComplete ? "bg-[#dcfce7] text-[#18794e]" : isUnlocked && (stepIndex === 0 || modules[`${course.title}-${stepIndex - 1}`]) ? "bg-[#dff4eb] text-[#18794e] hover:bg-[#c7eadc]" : "bg-[#e2ebe7] text-[#71817c]"}`}>{moduleComplete ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}{moduleComplete ? text.moduleDone : !isUnlocked ? text.locked : text.read}</button></div>;
+              return <div key={step} className="rounded-xl border border-[#e3ece8] bg-[#f8fbfa] p-3 dark:border-[#1d5743] dark:bg-[#0b261d]">
+                <div className="flex items-start justify-between gap-2"><p className="text-xs leading-5 text-[#526b65] dark:text-[#c5e2d8]"><span className="mr-1 font-bold text-[#18794e]">{text.module} {stepIndex + 1}:</span>{step}</p><button type="button" disabled={!isUnlocked || moduleComplete || !previousModuleComplete} onClick={() => openModule(index, stepIndex)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-bold transition disabled:cursor-not-allowed ${moduleComplete ? "bg-[#dcfce7] text-[#18794e]" : isUnlocked && previousModuleComplete ? "bg-[#dff4eb] text-[#18794e] hover:bg-[#c7eadc]" : "bg-[#e2ebe7] text-[#71817c]"}`}>{moduleComplete ? <CheckCircle className="inline h-3.5 w-3.5" /> : null} {moduleComplete ? text.moduleDone : !isUnlocked ? text.locked : text.open}</button></div>
+                {moduleOpen && !moduleComplete && <div className="mt-3 border-t border-[#dce9e4] pt-3 dark:border-[#1d5743]"><p className="text-sm font-bold text-[#1f4d43] dark:text-[#e5f5ee]">{text.quiz}</p><p className="mt-2 text-sm leading-6 text-[#526b65] dark:text-[#c5e2d8]">{quizQuestion}</p><div className="mt-2 grid gap-2">{quizOptions.map((option, optionIndex) => <label key={option} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs ${selectedAnswer === optionIndex ? "border-[#2a7d70] bg-[#eaf8f2]" : "border-[#dce9e4] dark:border-[#1d5743]"}`}><input type="radio" name={`${course.title}-${stepIndex}`} checked={selectedAnswer === optionIndex} onChange={() => setSelectedAnswer(optionIndex)} />{option}</label>)}</div><button type="button" onClick={() => submitQuiz(index, stepIndex)} className="mt-3 rounded-lg bg-[#18794e] px-3 py-2 text-xs font-bold text-white hover:bg-[#12643f]">{text.submit}</button>{quizMessage && <p className="mt-2 text-xs font-semibold text-[#18794e] dark:text-[#86efac]">{quizMessage}</p>}</div>}
+              </div>;
             })}</div>
             <button type="button" disabled={!isUnlocked || isComplete || !modulesComplete} onClick={() => completeCourse(course.title, index)} className={`mt-4 inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed ${isComplete ? "bg-[#dcfce7] text-[#18794e]" : isUnlocked && modulesComplete ? "bg-[#22c55e] text-[#052e16] hover:bg-[#4ade80]" : "bg-[#dce6e2] text-[#647a78]"}`}>
               {isComplete ? <CheckCircle2 className="h-4 w-4" /> : !isUnlocked ? <LockKeyhole className="h-4 w-4" /> : null}{isComplete ? text.done : isUnlocked && modulesComplete ? text.finish : text.read}

@@ -124,6 +124,34 @@ export const learningCourses = [
   { title: "Harvest, Storage, and Market Readiness", titleRw: "Gusarura, kubika no gutegura umusaruro ku isoko", duration: "22 min", summary: "Reduce post-harvest loss and prepare clean, quality produce for buyers.", summaryRw: "Gabanya igihombo nyuma yo gusarura utegure umusaruro usukuye kandi mwiza ku baguzi.", steps: ["Harvest at the right maturity and keep damaged produce separate.", "Dry grains fully and store them in clean, dry, pest-safe containers.", "Compare district prices, grade produce honestly, and keep simple sales records."], stepsRw: ["Sarura igihe gikwiye kandi utandukanye umusaruro wangiritse.", "Yumisha ibinyampeke neza ubibike mu bikoresho bisukuye, byumye kandi birinda udukoko.", "Gereranya ibiciro by'uturere, shyira umusaruro mu byiciro kandi wandike ibyo wagurishije."] },
 ] as const;
 
+export const learningQuizzes = [
+  [
+    { question: "How often should you inspect different parts of the field?", questionRw: "Ni kangahe ugomba gusuzuma ibice bitandukanye by'umurima?", options: ["Twice a week", "Once a season", "Only at harvest"], optionsRw: ["Kabiri mu cyumweru", "Rimwe mu gihembwe", "Gusa mu gihe cyo gusarura"], answer: 0 },
+    { question: "What should you record with a crop photo?", questionRw: "Ni iki wandikana n'ifoto y'igihingwa?", options: ["Symptoms, location, and date", "Only the weather", "The market price only"], optionsRw: ["Ibimenyetso, aho biri n'itariki", "Ikirere gusa", "Igiciro cyo ku isoko gusa"], answer: 0 },
+    { question: "What should you do with badly affected plants?", questionRw: "Ukora iki ku bihingwa byafashwe cyane?", options: ["Separate them and ask an extension officer", "Mix them with healthy plants", "Sell them immediately"], optionsRw: ["Ubitandukanye ukabaza umujyanama w'ubuhinzi", "Ubivanga n'ibizima", "Uhite ubigurisha"], answer: 0 },
+  ],
+  [
+    { question: "What is a good first step before using pesticides?", questionRw: "Ni iki wakora mbere yo gukoresha imiti yica udukoko?", options: ["Use field hygiene and hand removal first", "Double the dose", "Spray every day"], optionsRw: ["Koresha isuku y'umurima no gukuramo udukoko n'intoki", "Kongera igipimo kabiri", "Gutera buri munsi"], answer: 0 },
+    { question: "Where do you find the correct pesticide dose?", questionRw: "Ni he ubona igipimo nyacyo cy'umuti?", options: ["On the approved product label", "From a guess", "From an unrelated crop"], optionsRw: ["Ku rupapuro rw'umuti wemewe", "Mu gukeka", "Ku gihingwa kitari cyo"], answer: 0 },
+    { question: "What protects your family during spraying?", questionRw: "Ni iki kirinda umuryango wawe igihe utera umuti?", options: ["Protective clothing and keeping children away", "Letting children help", "Pouring leftovers in water"], optionsRw: ["Imyambaro y'ubwirinzi no gukura abana kure", "Kureka abana bagafasha", "Gusuka ibisigazwa mu mazi"], answer: 0 },
+  ],
+  [
+    { question: "Why should farmers rotate crops?", questionRw: "Kuki abahinzi bahinduranya ibihingwa?", options: ["To support soil health and reduce problems", "To remove all soil cover", "To avoid using compost"], optionsRw: ["Kugira ngo barinde ubutaka kandi bagabanye ibibazo", "Kuvanaho ibikingira ubutaka byose", "Kwirinda ifumbire"], answer: 0 },
+    { question: "What should be returned to the field in the right amount?", questionRw: "Ni iki gisubizwa mu murima ku rugero rukwiye?", options: ["Mature compost and manure", "Plastic waste", "Pesticide leftovers"], optionsRw: ["Ifumbire iboze neza n'imborera", "Imyanda ya pulasitiki", "Ibisigazwa by'imiti"], answer: 0 },
+    { question: "When should you apply fertilizer?", questionRw: "Ni ryari ukoresha ifumbire?", options: ["After checking crop, soil, and rainfall needs", "Without checking anything", "Only after harvest"], optionsRw: ["Umaze kureba igihingwa, ubutaka n'imvura", "Utarebye na kimwe", "Gusa nyuma yo gusarura"], answer: 0 },
+  ],
+  [
+    { question: "What should guide your planting time?", questionRw: "Ni iki kiyobora igihe cyo gutera?", options: ["The season forecast and suitable varieties", "A random date", "The market colour"], optionsRw: ["Iteganyagihe n'imbuto zijyanye n'akarere", "Itariki wahisemo uko wiboneye", "Ibara ry'isoko"], answer: 0 },
+    { question: "How can you conserve soil moisture?", questionRw: "Wabika ute ubuhehere bw'ubutaka?", options: ["Use mulch and manage water", "Remove all soil cover", "Flood the field"], optionsRw: ["Ukoreshe ibisigazwa kandi ucunge amazi", "Uvanaho ibikingira ubutaka byose", "Wuzuze umurima amazi"], answer: 0 },
+    { question: "When should you avoid spraying?", questionRw: "Ni ryari wirinda gutera umuti?", options: ["Just before rain", "On a calm dry morning", "After reading the label"], optionsRw: ["Mbere y'imvura", "Mu gitondo cyumye kandi gituje", "Nyuma yo gusoma amabwiriza"], answer: 0 },
+  ],
+  [
+    { question: "What should be separated during harvest?", questionRw: "Ni iki gitandukanywa mu gihe cyo gusarura?", options: ["Damaged produce from good produce", "All produce from the field", "Clean grains from clean grains"], optionsRw: ["Umusaruro wangiritse n'umwiza", "Umusaruro wose n'umurima", "Ibinyampeke bisukuye n'ibisukuye"], answer: 0 },
+    { question: "What is important before storing grains?", questionRw: "Ni iki cy'ingenzi mbere yo kubika ibinyampeke?", options: ["Dry them fully", "Keep them wet", "Mix them with pesticide leftovers"], optionsRw: ["Kubyumisha neza", "Kubibika bitose", "Kubivanga n'ibisigazwa by'imiti"], answer: 0 },
+    { question: "What helps you sell at a fair price?", questionRw: "Ni iki kigufasha kugurisha ku giciro cyiza?", options: ["Compare district prices and keep records", "Hide the crop quality", "Ignore the market"], optionsRw: ["Kugereranya ibiciro by'uturere no kwandika", "Guhisha ubuziranenge bw'umusaruro", "Kwirengagiza isoko"], answer: 0 },
+  ],
+] as const;
+
 export const rwandaDistricts = [
   "Gasabo",
   "Kicukiro",
