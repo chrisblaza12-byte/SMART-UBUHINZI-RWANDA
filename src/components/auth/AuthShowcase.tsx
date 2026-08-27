@@ -27,6 +27,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
@@ -73,6 +74,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
         const user = new Parse.User();
         user.set("username", cleanEmail); user.set("email", cleanEmail); user.set("password", password);
         user.set("fullName", getAdminName(cleanEmail) || fullName.trim());
+        if (phoneNumber.trim()) user.set("phoneNumber", phoneNumber.trim());
         user.set("role", getAdminName(cleanEmail) ? "admin" : "farmer");
         user.set("learningTopic", learningTopic);
         try {
@@ -99,6 +101,7 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
         farmerProfile.set("user", signedInUser);
         farmerProfile.set("fullName", String(signedInUser.get("fullName") || fullName.trim()));
         farmerProfile.set("email", cleanEmail);
+        if (phoneNumber.trim()) farmerProfile.set("phoneNumber", phoneNumber.trim());
         farmerProfile.set("role", getAdminName(cleanEmail) ? "admin" : "farmer");
         farmerProfile.set("status", "active");
         farmerProfile.set("learningTopic", learningTopic);
@@ -189,6 +192,8 @@ export function AuthShowcase({ onClose, onSuccess }: AuthShowcaseProps) {
                 placeholder="Email"
                 autoComplete="email"
               />
+
+              {!isSignIn && <TextInput value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} type="tel" placeholder="Phone number (+250...)" autoComplete="tel" />}
 
               <div className="relative">
                 <TextInput

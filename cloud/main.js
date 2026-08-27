@@ -63,6 +63,7 @@ Parse.Cloud.afterSave(Parse.User, async (request) => {
     const profile = new Parse.Object("FarmerProfile");
     profile.set("fullName", user.get("fullName"));
     profile.set("email", email);
+    profile.set("phoneNumber", user.get("phoneNumber") || "");
     profile.set("learningTopic", user.get("learningTopic"));
     profile.set("role", ADMIN_EMAILS.includes(email) ? "admin" : "farmer");
     profile.set("status", "active");
@@ -143,6 +144,47 @@ Parse.Cloud.beforeSave("MarketplaceContact", async (request) => {
     request.object.set("respondedBy", user);
     request.object.set("status", String(request.object.get("response") || "").trim() ? "answered" : "new");
   }
+});
+
+async function sendExternalNotification({ recipients, title, body, channels }) {
+  const requested = channels.filter((channel) => channel !== "inbox");
+  const missing = [];
+  if (requested.includes("email") && (!process.env.RESEND_API_KEY || !process.env.NOTIFICATION_FROM_EMAIL)) missing.push("email");
+  if ((requested.includes("sms") || requested.includes("phone")) && (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_FROM_NUMBER)) missing.push("sms/phone");
+  if (missing.length) throw new Parse.Error(Parse.Error.SCRIPT_FAILED, `Configure notification provider credentials for ${missing.join(" and ")}.`);
+
+  const results = [];
+  if (requested.includes("email")) {
+    for (const recipient of recipients.filter((item) => item.email)) {
+      const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: process.env.NOTIFICATION_FROM_EMAIL, to: [recipient.email], subject: title, text: body }) });
+      if (!response.ok) throw new Parse.Error(Parse.Error.SCRIPT_FAILED, "Email provider rejected the notification.");
+      results.push("email");
+    }
+  }
+  if (requested.includes("sms") || requested.includes("phone")) {
+    const auth = Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString("base64");
+    for (const recipient of recipients.filter((item) => item.phone)) {
+      const sendTwilio = async (path, values) => {
+        const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/${path}`, { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(values) });
+        if (!response.ok) throw new Parse.Error(Parse.Error.SCRIPT_FAILED, "Twilio rejected the notification.");
+      };
+      if (requested.includes("sms")) { await sendTwilio("Messages.json", { To: recipient.phone, From: process.env.TWILIO_FROM_NUMBER, Body: `${title}\n\n${body}` }); results.push("sms"); }
+      if (requested.includes("phone")) { await sendTwilio("Calls.json", { To: recipient.phone, From: process.env.TWILIO_FROM_NUMBER, Twiml: `<Response><Say>${title}. ${body}</Say></Response>` }); results.push("phone"); }
+    }
+  }
+  return results;
+}
+
+Parse.Cloud.define("deliverFarmerNotification", async (request) => {
+  const user = request.user;
+  if (!user || !ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()))) throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "Only administrators can send farmer notifications.");
+  const channels = Array.isArray(request.params.channels) ? request.params.channels : [];
+  const query = new Parse.Query(Parse.User);
+  query.limit(1000);
+  const farmers = await query.find({ useMasterKey: true });
+  const recipients = farmers.filter((farmer) => !ADMIN_EMAILS.includes(cleanEmail(farmer.get("email") || farmer.getUsername()))).map((farmer) => ({ email: String(farmer.get("email") || ""), phone: String(farmer.get("phoneNumber") || "") }));
+  const delivered = await sendExternalNotification({ recipients, title: String(request.params.title || "Farmer update"), body: String(request.params.body || ""), channels });
+  return { delivered, recipients: recipients.length };
 });
 
 Parse.Cloud.define("hello", async () => ({ message: "Smart Ubuhinzi backend is ready." }));

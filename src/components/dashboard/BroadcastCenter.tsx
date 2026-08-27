@@ -51,12 +51,15 @@ export function BroadcastCenter({ isAdmin }: BroadcastCenterProps) {
     if (!title.trim() || !body.trim()) return setStatus("Add a title and message before sending.");
     const currentUser = Parse.User.current();
     if (!currentUser) return;
+    const messageTitle = title.trim();
+    const messageBody = body.trim();
+    const selectedChannels = [...channels];
     setSending(true);
     setStatus("");
     try {
       const message = new Parse.Object("BroadcastMessage");
-      message.set("title", title.trim());
-      message.set("body", body.trim());
+      message.set("title", messageTitle);
+      message.set("body", messageBody);
       message.set("audience", "farmers");
       message.set("createdBy", currentUser);
       message.set("channels", channels);
@@ -65,6 +68,10 @@ export function BroadcastCenter({ isAdmin }: BroadcastCenterProps) {
       acl.setWriteAccess(currentUser, true);
       message.setACL(acl);
       await message.save();
+      const externalChannels = selectedChannels.filter((channel) => channel !== "inbox");
+      if (externalChannels.length) {
+        await Parse.Cloud.run("deliverFarmerNotification", { title: messageTitle, body: messageBody, channels: externalChannels });
+      }
       setTitle("");
       setBody("");
       setChannels(["inbox"]);

@@ -21,6 +21,18 @@ VITE_PARSE_JAVASCRIPT_KEY=YOUR_REAL_JAVASCRIPT_KEY
 VITE_PARSE_SERVER_URL=https://parseapi.back4app.com/parse
 ```
 
+For real admin notifications outside the inbox, configure these variables in the server-side Back4App Cloud Code environment. Never put them in `VITE_*` browser variables or commit them to GitHub:
+
+```env
+RESEND_API_KEY=YOUR_RESEND_API_KEY
+NOTIFICATION_FROM_EMAIL=notifications@example.com
+TWILIO_ACCOUNT_SID=YOUR_TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN=YOUR_TWILIO_AUTH_TOKEN
+TWILIO_FROM_NUMBER=+250XXXXXXXXX
+```
+
+Farmers should register a phone number in international format such as `+250...`. Inbox delivery works without these provider variables; email, SMS, and phone call delivery require the matching provider credentials.
+
 Never put the Master Key in a frontend `.env` file or GitHub. If login returns **Unauthorized**, verify all three values are from the *same* Back4App app and restart `npm run dev` after changing `.env.local`.
 
 ## Edit website words and images
