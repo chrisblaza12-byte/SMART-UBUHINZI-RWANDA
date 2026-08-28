@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { CropTestPanel } from "./CropTestPanel";
 import { BroadcastCenter } from "./BroadcastCenter";
 import { AdminOrdersPanel } from "./AdminOrdersPanel";
+import { SellerListingPanel } from "./SellerListingPanel";
 import { dashboardSidebarItems, DashboardTab } from "./dashboardTypes";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { FarmerLearningCenter } from "./FarmerLearningCenter";
@@ -157,7 +158,8 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace, language
           {activeTab === "Learning Center" && <FarmerLearningCenter userId={currentUser.id || currentUser.getUsername() || "farmer"} language={language} />}
           {activeTab === "Messages" && <BroadcastCenter isAdmin={isAdmin} />}
           {activeTab === "Orders" && (isAdmin ? <AdminOrdersPanel /> : <InfoCard title="Orders" text="Only platform administrators can view farmer orders." />)}
-          {["Sell Products", "Settings"].includes(activeTab) && (
+          {activeTab === "Sell Products" && <SellerListingPanel user={currentUser} />}
+          {activeTab === "Settings" && (
             <InfoCard
               title={activeTab}
               text="This workspace is ready for your farming activity. Live marketplace and weather information remains connected."

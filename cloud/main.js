@@ -137,25 +137,6 @@ Parse.Cloud.beforeSave("MarketplaceContact", async (request) => {
       throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "You cannot contact yourself.");
     }
 
-  Parse.Cloud.beforeSave("MarketplaceOrder", async (request) => {
-    const user = request.user;
-    if (!user) throw new Parse.Error(Parse.Error.SESSION_MISSING, "Sign in to request a purchase.");
-    if (!request.original) {
-      request.object.set("buyer", user);
-      request.object.set("status", "pending");
-      if (!String(request.object.get("listingId") || "").trim()) {
-        throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "A purchase must reference a market listing.");
-      }
-      const acl = new Parse.ACL();
-      acl.setReadAccess(user, true);
-      acl.setWriteAccess(user, true);
-      acl.setRoleReadAccess(ADMIN_ROLE, true);
-      acl.setRoleWriteAccess(ADMIN_ROLE, true);
-      request.object.setACL(acl);
-    } else if (request.object.get("buyer")?.id !== user.id && !ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()))) {
-      throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "You can only update your own purchase requests.");
-    }
-  });
   } else if (!admin) {
     request.object.set("sender", request.original.get("sender"));
     request.object.set("response", request.original.get("response"));
@@ -166,6 +147,43 @@ Parse.Cloud.beforeSave("MarketplaceContact", async (request) => {
     request.object.set("message", request.original.get("message"));
     request.object.set("respondedBy", user);
     request.object.set("status", String(request.object.get("response") || "").trim() ? "answered" : "new");
+  }
+});
+
+Parse.Cloud.beforeSave("MarketplaceOrder", async (request) => {
+  const user = request.user;
+  if (!user) throw new Parse.Error(Parse.Error.SESSION_MISSING, "Sign in to request a purchase.");
+  const admin = ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()));
+  if (!request.original) {
+    request.object.set("buyer", user);
+    request.object.set("status", "pending");
+    if (!String(request.object.get("listingId") || "").trim()) throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "A purchase must reference a market listing.");
+    const acl = new Parse.ACL();
+    acl.setReadAccess(user, true);
+    acl.setWriteAccess(user, true);
+    acl.setRoleReadAccess(ADMIN_ROLE, true);
+    acl.setRoleWriteAccess(ADMIN_ROLE, true);
+    request.object.setACL(acl);
+  } else if (!admin && request.object.get("buyer")?.id !== user.id) {
+    throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "You can only update your own purchase requests.");
+  }
+});
+
+Parse.Cloud.beforeSave("LabourMarketPrice", async (request) => {
+  const user = request.user;
+  if (!user) throw new Parse.Error(Parse.Error.SESSION_MISSING, "Sign in to publish a crop listing.");
+  const admin = ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()));
+  const owner = request.object.get("seller") || request.original?.get("seller");
+  if (!admin && owner?.id !== user.id) throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "A listing must belong to the signed-in farmer.");
+  if (!String(request.object.get("crop") || "").trim() || !String(request.object.get("district") || "").trim()) throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "Crop and district are required.");
+  if (Number(request.object.get("price")) <= 0 || Number(request.object.get("availableKg")) < 0) throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "Price and availability must be valid numbers.");
+  if (!request.original) {
+    request.object.set("seller", user);
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    acl.setWriteAccess(user, true);
+    acl.setRoleWriteAccess(ADMIN_ROLE, true);
+    request.object.setACL(acl);
   }
 });
 

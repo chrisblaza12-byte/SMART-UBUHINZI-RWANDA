@@ -57,6 +57,7 @@ export async function ensureSeedPrices(): Promise<void> {
 export async function fetchMarketPrices(): Promise<MarketPriceRow[]> {
   await ensureSeedPrices();
   const query = new Parse.Query(CLASS_NAME);
+  query.include("seller");
   query.limit(200);
   query.ascending("district");
   const results = await query.find();
