@@ -34,7 +34,7 @@ export function FarmerNewsSection() {
         <div className="fixed inset-0 z-[120] flex items-center justify-center overflow-y-auto bg-[#020617]/80 p-3 backdrop-blur-sm sm:p-6">
           <article role="dialog" aria-modal="true" aria-labelledby="story-title" className="relative my-auto max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[#334155] bg-[#F8FAFC] shadow-2xl dark:bg-[#0F172A]">
             <button type="button" onClick={() => setSelectedStory(null)} aria-label="Close story" className="absolute right-4 top-4 z-10 grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-[#020617]/70 text-white transition hover:bg-[#22C55E]"><X className="h-4 w-4" /></button>
-            <img src={selectedStory.image} alt="Rwandan agriculture" className="h-52 w-full object-cover sm:h-72" />
+            <img loading="lazy" decoding="async" src={selectedStory.image} alt="Rwandan agriculture" className="h-52 w-full object-cover sm:h-72" />
             <div className="mx-auto max-w-2xl px-5 py-7 sm:px-10 sm:py-9">
               <div className="flex items-center gap-2 text-xs font-semibold text-[#166534] dark:text-[#4ADE80]"><BookOpen className="h-4 w-4" /> {selectedStory.category} • {selectedStory.date}</div>
               <h2 id="story-title" className="mt-3 font-serif text-3xl font-bold leading-tight text-[#0F172A] dark:text-[#F8FAFC] sm:text-4xl">{selectedStory.title}</h2>

@@ -35,6 +35,25 @@ Farmers should register a phone number in international format such as `+250...`
 
 Never put the Master Key in a frontend `.env` file or GitHub. If login returns **Unauthorized**, verify all three values are from the *same* Back4App app and restart `npm run dev` after changing `.env.local`.
 
+## Google and production setup
+
+The website reads these browser-safe values from `.env.local`, Vercel Environment Variables, or the Docker runtime environment:
+
+```env
+VITE_GOOGLE_SITE_VERIFICATION=VALUE_FROM_SEARCH_CONSOLE
+VITE_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+```
+
+For Search Console, add the verified production domain, choose **HTML tag**, copy its content value into `VITE_GOOGLE_SITE_VERIFICATION`, deploy, and then click **Verify**. Google Analytics 4 uses the `G-...` measurement ID and starts after deployment. The app loads Analytics only when that variable is present.
+
+HTTPS and `www` are configured at the hosting provider: add the custom domain and its `www` hostname, set the preferred hostname redirect (for example `www` to the apex domain), and wait for the provider-managed TLS certificate. Do not put private certificates in this repository. The canonical URL in `index.html` should be changed if the final production domain is different.
+
+Google Business Profile is created and verified in the Google Business Profile manager, then the website URL is added to the profile. Business Profile API access requires a Google Cloud project, OAuth consent, and approved API access; those credentials must stay server-side.
+
+Gemini also requires a server-side Google AI API key. Do not expose a Gemini key as `VITE_*` or call Gemini directly from the browser. Add a protected Cloud Code endpoint that validates the signed-in farmer, calls Gemini with the server-only key, and returns a bounded diagnosis response. The current crop diagnosis remains available without that optional provider.
+
+For image performance, store compressed WebP or AVIF versions in `public/images/` (keep a JPG fallback where needed), use responsive `srcset` sizes, and avoid uploading camera originals. The Nginx and Vercel configurations cache image files for 30 days and compress text/SVG assets.
+
 ## Edit website words and images
 
 - Navigation and shared wording: `src/lib/translations.ts`

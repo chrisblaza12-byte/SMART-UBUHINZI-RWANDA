@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import './parse'
+import { configureSiteIntegrations } from './lib/siteConfig'
+
+configureSiteIntegrations()
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },

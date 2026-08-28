@@ -97,6 +97,8 @@ export function CropKnowledgeSection() {
         <div className="grid gap-0 lg:grid-cols-2">
           <div className="relative min-h-[320px] border-b border-[#D6D3C4] dark:border-[#334155] lg:border-b-0 lg:border-r">
             <img
+              loading="lazy"
+              decoding="async"
               src={aboutBookImages.cover}
               alt="Rwandan farmland — about Smart Ubuhinzi Rwanda"
               className="absolute inset-0 h-full w-full object-cover"
