@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CropTestPanel } from "./CropTestPanel";
 import { BroadcastCenter } from "./BroadcastCenter";
+import { AdminOrdersPanel } from "./AdminOrdersPanel";
 import { dashboardSidebarItems, DashboardTab } from "./dashboardTypes";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { FarmerLearningCenter } from "./FarmerLearningCenter";
@@ -155,6 +156,7 @@ export function FarmerDashboard({ onLogout, isAdmin, onOpenMarketplace, language
           {activeTab === "Crop Prices" && (isAdmin ? <AdminMarketPricePanel /> : <InfoCard title="Crop Prices" text="Market prices are managed by the two approved platform administrators." />)}
           {activeTab === "Learning Center" && <FarmerLearningCenter userId={currentUser.id || currentUser.getUsername() || "farmer"} language={language} />}
           {activeTab === "Messages" && <BroadcastCenter isAdmin={isAdmin} />}
+          {activeTab === "Orders" && (isAdmin ? <AdminOrdersPanel /> : <InfoCard title="Orders" text="Only platform administrators can view farmer orders." />)}
           {["Sell Products", "Settings"].includes(activeTab) && (
             <InfoCard
               title={activeTab}

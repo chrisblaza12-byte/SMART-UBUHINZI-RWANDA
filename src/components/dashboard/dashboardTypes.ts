@@ -8,6 +8,7 @@ export type DashboardTab =
   | "AI Detection"
   | "Learning Center"
   | "Messages"
+  | "Orders"
   | "Settings";
 
 export const dashboardSidebarItems: DashboardTab[] = [
@@ -20,5 +21,6 @@ export const dashboardSidebarItems: DashboardTab[] = [
   "AI Detection",
   "Learning Center",
   "Messages",
+  "Orders",
   "Settings",
 ];
