@@ -9,6 +9,10 @@ export type MarketPriceRow = {
   price: number;
   availableKg: number;
   updatedAt: number;
+  sellerId?: string;
+  sellerName?: string;
+  sellerPhone?: string;
+  sellerEmail?: string;
 };
 
 const CLASS_NAME = "LabourMarketPrice";
@@ -64,6 +68,10 @@ export async function fetchMarketPrices(): Promise<MarketPriceRow[]> {
     price: item.get("price"),
     availableKg: item.get("availableKg"),
     updatedAt: item.updatedAt ? item.updatedAt.getTime() : Date.now(),
+    sellerId: item.get("seller")?.id || item.get("sellerId") || undefined,
+    sellerName: item.get("sellerName") || item.get("seller")?.get?.("fullName") || undefined,
+    sellerPhone: item.get("sellerPhone") || item.get("seller")?.get?.("phoneNumber") || undefined,
+    sellerEmail: item.get("sellerEmail") || item.get("seller")?.get?.("email") || undefined,
   }));
 }
 

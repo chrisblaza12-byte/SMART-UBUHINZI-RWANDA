@@ -133,6 +133,29 @@ Parse.Cloud.beforeSave("MarketplaceContact", async (request) => {
     acl.setWriteAccess(user, true);
     acl.setRoleWriteAccess(ADMIN_ROLE, true);
     request.object.setACL(acl);
+    if (request.object.get("recipient") && request.object.get("recipient").id === user.id) {
+      throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "You cannot contact yourself.");
+    }
+
+  Parse.Cloud.beforeSave("MarketplaceOrder", async (request) => {
+    const user = request.user;
+    if (!user) throw new Parse.Error(Parse.Error.SESSION_MISSING, "Sign in to request a purchase.");
+    if (!request.original) {
+      request.object.set("buyer", user);
+      request.object.set("status", "pending");
+      if (!String(request.object.get("listingId") || "").trim()) {
+        throw new Parse.Error(Parse.Error.VALIDATION_ERROR, "A purchase must reference a market listing.");
+      }
+      const acl = new Parse.ACL();
+      acl.setReadAccess(user, true);
+      acl.setWriteAccess(user, true);
+      acl.setRoleReadAccess(ADMIN_ROLE, true);
+      acl.setRoleWriteAccess(ADMIN_ROLE, true);
+      request.object.setACL(acl);
+    } else if (request.object.get("buyer")?.id !== user.id && !ADMIN_EMAILS.includes(cleanEmail(user.get("email") || user.getUsername()))) {
+      throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "You can only update your own purchase requests.");
+    }
+  });
   } else if (!admin) {
     request.object.set("sender", request.original.get("sender"));
     request.object.set("response", request.original.get("response"));

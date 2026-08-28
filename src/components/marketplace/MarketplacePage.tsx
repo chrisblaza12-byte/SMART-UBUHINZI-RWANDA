@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AreaChart as ReAreaChart, Area as ReArea, CartesianGrid, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer as ReContainer } from "recharts";
 import { rwandaDistricts } from "../../data/homeData";
 import { useMarketPrices } from "../../hooks/useMarketPrices";
+import { MarketPriceRow } from "../../lib/marketPrices";
 import { Language, translations } from "../../lib/translations";
 
 type MarketplacePageProps = {
@@ -15,7 +16,9 @@ type MarketplacePageProps = {
 export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) {
   const [search, setSearch] = useState("");
   const [district, setDistrict] = useState("__all");
-  const [selectedListing, setSelectedListing] = useState<{ id: string; crop: string; district: string } | null>(null);
+  const [selectedListing, setSelectedListing] = useState<MarketPriceRow | null>(null);
+  const [purchaseListing, setPurchaseListing] = useState<MarketPriceRow | null>(null);
+  const [quantityKg, setQuantityKg] = useState(10);
   const [contactMessage, setContactMessage] = useState("");
   const t = translations[language];
   const { rows, loading, lastUpdated } = useMarketPrices();
@@ -45,24 +48,53 @@ export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) 
     return user;
   };
 
-  const handleBuy = async (listing: { crop: string; district: string; price: number }) => {
+  const handleBuy = (listing: MarketPriceRow) => {
     const user = requireUser();
     if (!user) return;
-
-    const order = new Parse.Object("MarketplaceOrder");
-    order.set("crop", listing.crop);
-    order.set("district", listing.district);
-    order.set("price", listing.price);
-    order.set("quantityKg", 10);
-    order.set("status", "pending");
-    order.set("buyer", user);
-    await order.save();
-    toast.success(`Order request sent for ${listing.crop} from ${listing.district}.`);
+    if (listing.availableKg <= 0) {
+      toast.error("This product is currently unavailable.");
+      return;
+    }
+    setPurchaseListing(listing);
+    setQuantityKg(Math.min(10, listing.availableKg));
   };
 
-  const openContact = (listing: { id: string; crop: string; district: string }) => {
+  const handleSubmitOrder = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!purchaseListing) return;
     const user = requireUser();
     if (!user) return;
+    if (quantityKg < 1 || quantityKg > purchaseListing.availableKg) {
+      toast.error(`Quantity must be between 1 and ${purchaseListing.availableKg} kg.`);
+      return;
+    }
+
+    const order = new Parse.Object("MarketplaceOrder");
+    order.set("crop", purchaseListing.crop);
+    order.set("district", purchaseListing.district);
+    order.set("price", purchaseListing.price);
+    order.set("quantityKg", quantityKg);
+    order.set("status", "pending");
+    order.set("buyer", user);
+    order.set("listingId", purchaseListing.id);
+    order.set("listingClass", "LabourMarketPrice");
+    if (purchaseListing.sellerId) order.set("seller", Parse.User.createWithoutData(purchaseListing.sellerId));
+    await order.save();
+    setPurchaseListing(null);
+    toast.success(`Order request sent for ${purchaseListing.crop} from ${purchaseListing.district}.`);
+  };
+
+  const openContact = (listing: MarketPriceRow) => {
+    const user = requireUser();
+    if (!user) return;
+    if (!listing.sellerId) {
+      toast.error("This listing has no linked farmer yet. Contact is unavailable.");
+      return;
+    }
+    if (!listing.sellerPhone && !listing.sellerEmail) {
+      toast.error("This farmer has no phone number or email on the listing.");
+      return;
+    }
     setSelectedListing(listing);
   };
 
@@ -82,6 +114,9 @@ export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) 
     inquiry.set("message", contactMessage.trim());
     inquiry.set("sender", user);
     inquiry.set("status", "new");
+    inquiry.set("listingId", selectedListing.id);
+    inquiry.set("listingClass", "LabourMarketPrice");
+    if (selectedListing.sellerId) inquiry.set("recipient", Parse.User.createWithoutData(selectedListing.sellerId));
     await inquiry.save();
 
     setContactMessage("");
@@ -232,9 +267,10 @@ export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) 
                         <button
                           type="button"
                           onClick={() => handleBuy(row)}
-                          className="inline-flex cursor-pointer items-center gap-1 rounded-md bg-[#22C55E] px-2 py-1 text-xs font-semibold text-[#052E16]"
+                          disabled={row.availableKg <= 0}
+                          className="inline-flex items-center gap-1 rounded-md bg-[#22C55E] px-2 py-1 text-xs font-semibold text-[#052E16] disabled:cursor-not-allowed disabled:bg-[#64748B] disabled:text-white"
                         >
-                          <ShoppingCart className="h-3.5 w-3.5" /> {t.marketplace.buy}
+                          <ShoppingCart className="h-3.5 w-3.5" /> {row.availableKg > 0 ? t.marketplace.buy : "Unavailable"}
                         </button>
                         <button
                           type="button"
@@ -253,12 +289,33 @@ export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) 
         )}
       </section>
 
+      {purchaseListing && (
+        <section className="rounded-2xl border border-[#22C55E] bg-white p-5 dark:bg-[#0F172A]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Order {purchaseListing.crop}</h2>
+              <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">{purchaseListing.district} • RWF {purchaseListing.price}/kg • {purchaseListing.availableKg} kg available</p>
+              <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Listing ID: {purchaseListing.id}</p>
+            </div>
+            <button type="button" onClick={() => setPurchaseListing(null)} aria-label="Close order form" className="rounded-md border border-[#CBD5E1] p-2 dark:border-[#334155]"><X className="h-4 w-4" /></button>
+          </div>
+          <form onSubmit={handleSubmitOrder} className="mt-4 flex flex-wrap items-end gap-3">
+            <label className="text-sm text-[#334155] dark:text-[#CBD5E1]">Quantity (kg)
+              <input type="number" min={1} max={purchaseListing.availableKg} value={quantityKg} onChange={(event) => setQuantityKg(Number(event.target.value))} className="mt-1 block w-36 rounded-md border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-2 text-[#0F172A] dark:border-[#334155] dark:bg-[#020617] dark:text-[#F8FAFC]" />
+            </label>
+            <p className="pb-2 text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Total: RWF {(purchaseListing.price * quantityKg).toLocaleString()}</p>
+            <button type="submit" className="rounded-md bg-[#22C55E] px-4 py-2 text-sm font-semibold text-[#052E16]">Send order request</button>
+          </form>
+        </section>
+      )}
+
       {selectedListing && (
         <section className="rounded-2xl border border-[#CBD5E1] bg-white p-5 dark:border-[#334155] dark:bg-[#0F172A]">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Contact farmer</h2>
-              <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">{selectedListing.crop} • {selectedListing.district}</p>
+              <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">{selectedListing.crop} • {selectedListing.district} • {selectedListing.sellerName || "Farmer"}</p>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{selectedListing.sellerPhone || selectedListing.sellerEmail}</p>
             </div>
             <button
               type="button"
@@ -288,6 +345,10 @@ export function MarketplacePage({ onOpenAuth, language }: MarketplacePageProps) 
               >
                 {t.marketplace.cancel}
               </button>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {selectedListing.sellerPhone && <a href={`tel:${selectedListing.sellerPhone}`} className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[#334155] dark:border-[#334155] dark:text-[#CBD5E1]">Call farmer</a>}
+              {selectedListing.sellerEmail && <a href={`mailto:${selectedListing.sellerEmail}`} className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[#334155] dark:border-[#334155] dark:text-[#CBD5E1]">Email farmer</a>}
             </div>
           </form>
         </section>
